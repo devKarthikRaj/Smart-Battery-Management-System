@@ -1,4 +1,4 @@
-#NTU EE3180 Design Innovation Project 3S Battery Management System (BMS) AY2023-24
+# NTU EE3180 Design Innovation Project 3S Battery Management System (BMS) AY2023-24
 This repository contains "most" of the hardware and software used for this project
 
 Features: TBC...
