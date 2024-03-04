@@ -1,14 +1,14 @@
 /****************************************************************** 
   Project: DIP 3s BMS ESP32 Firmware V1
   Requirements:
-    1. Read battery voltage (Done)
+    1. Read battery voltage                                      (Done)
     2. Convert battery voltage ADC value to actual voltage value (Done)
-    3. Post actual voltage to ThingSpeak (Done)
-    4. Read temp sensor
-    5. Activate the fan if temp exceeds a preset threshold
-    6. Calculate SoC
-    7. Calculate SoH
-    8. Drive the RGB LED based on combined SoH for all 3 cells
+    3. Post actual voltage to ThingSpeak                         (Done)
+    4. Read temp sensor                                          (Done)
+    5. Activate the fan if temp exceeds a preset threshold       (Done)
+    6. Calculate SoC                                             (Done)
+    7. Calculate SoH                                             (Done)
+    8. Drive the RGB LED based on combined SoH for all 3 cells (TBD...)
 
   WARNING: Remove sensitive info before pushing to Github
  ******************************************************************/
