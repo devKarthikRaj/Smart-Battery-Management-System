@@ -3,12 +3,13 @@
   Requirements:
     1. Read battery voltage                                      (Done)
     2. Convert battery voltage ADC value to actual voltage value (Done)
-    3. Post actual voltage to ThingSpeak                         (Done)
-    4. Read temp sensor                                          (Done)
-    5. Activate the fan if temp exceeds a preset threshold       (Done)
-    6. Calculate SoC                                             (Done)
-    7. Calculate SoH                                             (Done)
-    8. Drive the RGB LED based on combined SoH for all 3 cells (TBD...)
+    3. Read temp sensor                                          (Done)
+    4. Activate the fan if temp exceeds a preset threshold       (Done)
+    5. Calculate SoC                                             (Done)
+    6. Calculate SoH                                             (Done)
+    7. Drive the RGB LED based on combined SoH for all 3 cells   (Done)
+    8. Post all data to ThingSpeak                               (Done)
+    9. Post all data to Blynk                                    (Done)
 
   WARNING: Remove sensitive info before pushing to Github
  ******************************************************************/
@@ -31,7 +32,7 @@ const int bPin          =  27;    //RGB blue pin
 
 //WiFi Vars
 const char* ssid = "";    // ***Remove before pushing***
-const char* pwd = "";  //***Remove before pushing***
+const char* pwd = "";     //***Remove before pushing***
 WiFiClient client;
 
 void setup() {
@@ -123,8 +124,8 @@ float CellVoltageSense(int cellVoltageSensePin) {
 
 bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, float data5, float data6, float data7, float data8) {
   //ThingSpeak Vars
-  unsigned long channelId = Channel_ID;             //***Remove before pushing***
-  const char* writeAPIKey = "";  //***Remove before pushing***
+  unsigned long channelId = Channel_ID;     //***Remove before pushing***
+  const char* writeAPIKey = "";             //***Remove before pushing***
   int writeStatus = false;
 
   ThingSpeak.setField(1, data1);
@@ -194,11 +195,36 @@ float calculateSOH(float voltage) {
 }
 
 void DriveRGB(int rPin, int gPin, int bPin, float cell1SOH, float cell2SOH, float cell3SOH) {
-  //Create an alogorithm to make the RGB:
-  //Good health = SoH > 90%
-  //Green:  3/3 cells in good health
-  //Orange: 2/3 cells in good health
-  //Yellow: 1/3 cells in good health
-  //Red:    0/3 cells in good health
-  //RGB LED off is if any one of the cells' SOH == -1 (SOH data unavailable as cells not fully charged)
+  if (cell1SOH == -1  cell2SOH == -1  cell3SOH == -1) {
+    digitalWrite(rPin, LOW);
+    digitalWrite(gPin, LOW);
+    digitalWrite(bPin, LOW);
+    return; // Exit function
+  }
+
+  // Determine the overall health of the 3 cells based on SoH
+  int healthyCells = 0;
+  if (cell1SOH > 90) healthyCells++;
+  if (cell2SOH > 90) healthyCells++;
+  if (cell3SOH > 90) healthyCells++;
+
+
+  // Drive the RGB LED based on the health of the 3 cells
+  if (healthyCells == 3) { // All 3 cells are healthy
+    digitalWrite(rPin, LOW);
+    digitalWrite(gPin, HIGH); // Green
+    digitalWrite(bPin, LOW);
+  } else if (healthyCells == 2) { // 2 out of the 3 cells are healthy
+    digitalWrite(rPin, HIGH); // Orange
+    analogWrite(gPin, 128); 
+    digitalWrite(bPin, LOW);
+  } else if (healthyCells == 1) { // 1 out of the 3 cells is healthy
+    digitalWrite(rPin, HIGH); // Yellow
+    digitalWrite(gPin, HIGH); 
+    digitalWrite(bPin, LOW);
+  } else { // 0 out of 3 cells is healthy
+    digitalWrite(rPin, HIGH); // Red
+    digitalWrite(gPin, LOW);
+    digitalWrite(bPin, LOW);
+  }
 }
