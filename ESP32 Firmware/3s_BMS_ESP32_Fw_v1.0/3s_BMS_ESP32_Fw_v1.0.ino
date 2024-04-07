@@ -7,9 +7,9 @@
     4. Activate the fan if temp exceeds a preset threshold       (Done)
     5. Calculate SoC                                             (Done)
     6. Calculate SoH                                             (Done)
-    7. Drive the RGB LED based on combined SoH for all 3 cells   (Done)
-    8. Post all data to ThingSpeak                               (Done)
-    9. Post all data to Blynk                                    (Done)
+    7. Drive the RGB LED based on combined SoH for all 3 cells   (TBC...)
+    8. Post data to ThingSpeak                                   (Done)
+    9. Post data to Mobile app                                   (Done)
 
   WARNING: Remove sensitive info before pushing to Github
  ******************************************************************/
@@ -23,12 +23,12 @@ const int cell2Pin      =  33;  //Cell 2 voltage pin
 const int cell3Pin      =  35;  //Cell 3 voltage pin
 const int tempSensePin  =  34;  //Temperature sensor pin
 const int fanConPin     =  23;  //Fan control pin
-const int rPin          =  25;    //RGB red pin
-const int gPin          =  26;    //RGB green pin
-const int bPin          =  27;    //RGB blue pin
+const int rPin          =  25;  //RGB red pin
+const int gPin          =  26;  //RGB green pin
+const int bPin          =  27;  //RGB blue pin
 
 //Const Definitions
-#define ambientTempThreshold 40  //Fan will turn on if temp exceeds 40 deg C
+#define ambientTempThreshold 30  //Fan will turn on if temp exceeds 30 deg C
 
 //WiFi Vars
 const char* ssid = "";    // ***Remove before pushing***
@@ -36,12 +36,13 @@ const char* pwd = "";     //***Remove before pushing***
 WiFiClient client;
 
 void setup() {
-  Serial.begin(115200);  //Init serial
+  //Serial.begin(115200); //Init serial
 
-  ConnectWifi();  //This is a blocking function!!!
+  ConnectWifi(); //This is a blocking function!!!
 
-  ThingSpeak.begin(client);  //Initialize ThingSpeak
+  ThingSpeak.begin(client); //Initialize ThingSpeak
 
+  //IO Definitions
   pinMode(cell1Pin, INPUT);
   pinMode(cell2Pin, INPUT);
   pinMode(cell3Pin, INPUT);
@@ -55,39 +56,49 @@ void setup() {
 void loop() {
   ConnectWifi();  //ConnectWifi called again in case Wifi abruptly disconnects
 
-  //Read cell voltages
-  float cell1Voltage = CellVoltageSense(cell1Pin);
-  float cell2Voltage = CellVoltageSense(cell2Pin);
-  float cell3Voltage = CellVoltageSense(cell3Pin);
+  //Read stepped down added cell voltages and calculate the actual added cell voltages
+  float Vc1 = CellVoltageSense(cell1Pin);
+  float Vc2 = CellVoltageSense(cell2Pin);
+  float Vc3 = CellVoltageSense(cell3Pin);
 
-  float cell1SOC = calculateSOC(cell1Voltage);
-  float cell2SOC = calculateSOC(cell1Voltage);
-  float cell3SOC = calculateSOC(cell1Voltage);
+  //Calculate individual cell voltages
+  Vc1 = Vc1 - Vc2;
+  Vc2 = Vc2 - Vc3;
+  //Vc3 is the actual voltage of the 3rd cell
 
+  //Calculate SOC
+  float cell1SOC = calculateSOC(Vc1);
+  float cell2SOC = calculateSOC(Vc2);
+  float cell3SOC = calculateSOC(Vc3);
+
+  
   //Set SOH to -1 to indicate that SOH cannot be calculated as battery is not fully charged
   float cell1SOH = -1;
   float cell2SOH = -1;
   float cell3SOH = -1;
   float combinedSOH = -1;
+  
   if (cell1Voltage > 4.1 && cell1Voltage < 4.2) {
     //Calculate SOH only when battery is at full charge
-    float cell1SOH = calculateSOH(cell1Voltage);
-    float cell2SOH = calculateSOH(cell2Voltage);
-    float cell3SOH = calculateSOH(cell3Voltage);
+    float cell1SOH = calculateSOH(Vc1);
+    float cell2SOH = calculateSOH(Vc2);
+    float cell3SOH = calculateSOH(Vc3);
     float combinedSOH = ((cell1SOH+cell2SOH+cell3SOH) / 300) * 100;
   }
 
+  //Drive RGB LED based on SOH value
+  DriveRGB(rPin, gPin, bPin, cell1SOH, cell2SOH, cell3SOH);
+  
   //Read Ambient Temp + Fan Control
   float ambientTemp = TempSense(34);
+
+  
   if (ambientTemp > ambientTempThreshold) {
     digitalWrite(fanConPin, HIGH);
   }
-
+  
   //Publish all cell monitoring data to ThingSpeak
-  ThingSpeakWrite8Floats(cell1Voltage, cell2Voltage, cell3Voltage, cell1SOC, cell2SOC, cell3SOC, combinedSOH, ambientTemp);
-
-  //Drive RGB LED based on SOH value
-  DriveRGB(rPin, gPin, bPin, cell1SOH, cell2SOH, cell3SOH);
+  ThingSpeakWrite8Floats(Vc1, Vc2, Vc3, cell1SOC, cell2SOC, cell3SOC, combinedSOH, ambientTemp);
 }
 
 void ConnectWifi() {
@@ -102,30 +113,35 @@ void ConnectWifi() {
   }
 }
 
+//Reads the raw stepped down added cell voltage and converts this raw reading back to the actual added cell voltage
 float CellVoltageSense(int cellVoltageSensePin) {
   //Conversion Vars
   const float conversionFactor = 4.2 / 4096;  //Li ion max cell voltage = 4.2 and ESP32 ADC = 12 bits so 2^12 = 4096
   const float conversionOffset = -0.1;        //ADC conversion offset
+  const int Rb = 10;
+  const int Rs = 1;
 
-  //Conversion
   int cellVoltageRaw = analogRead(cellVoltageSensePin);
-  float cellVoltageActual = (cellVoltageRaw * conversionFactor) + conversionOffset;
+  
+  //Conversion
+  float Vs = (cellVoltageRaw * conversionFactor) + conversionOffset; //Calculate raw voltage from ADC value
+  float Vb = ((Rs+Rb)/Rs) * Vs; //Calculate actual added cell voltage (Vb = Vbig)
 
   //Debugging
-  Serial.println();
-  Serial.print("Cell Voltage Raw: ");
-  Serial.print(cellVoltageRaw);
-  Serial.print(" Cell Voltage Actual: ");
-  Serial.print(cellVoltageActual);
-  Serial.println();
+  //Serial.println();
+  //Serial.print("Cell Voltage Raw: ");
+  //Serial.print(cellVoltageRaw);
+  //Serial.print(" Cell Voltage Actual: ");
+  ///Serial.print(Vb);
+  //Serial.println();
 
-  return cellVoltageActual;
+  return cellVoltageRaw;
 }
 
 bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, float data5, float data6, float data7, float data8) {
   //ThingSpeak Vars
-  unsigned long channelId = Channel_ID;     //***Remove before pushing***
-  const char* writeAPIKey = "";             //***Remove before pushing***
+  unsigned long channelId = 2454172;            //***Remove before pushing***
+  const char* writeAPIKey = "4POHYZ95Y3YP52OG"; //***Remove before pushing***
   int writeStatus = false;
 
   ThingSpeak.setField(1, data1);
@@ -138,14 +154,15 @@ bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, 
   ThingSpeak.setField(8, data8);
   int writeStatusCode = ThingSpeak.writeFields(channelId, writeAPIKey);
 
-  //ThingSpeak will return HTTP status code 200 if successful
+  
+  /*//ThingSpeak will return HTTP status code 200 if successful
   if (writeStatusCode == 200) {
     Serial.println("ThingSpeak Channel update successful.");
     return true;
   } else {
     Serial.println("Problem updating ThingSpeak channel... HTTP error code " + String(writeStatusCode));
     return false;
-  }
+  }*/
 
   //If the data packets are sent out in under 15s intervals, HTTP status code 401 will be returned
   //Some packets will still be sent but this is not recommended
@@ -195,7 +212,7 @@ float calculateSOH(float voltage) {
 }
 
 void DriveRGB(int rPin, int gPin, int bPin, float cell1SOH, float cell2SOH, float cell3SOH) {
-  if (cell1SOH == -1  cell2SOH == -1  cell3SOH == -1) {
+  if (cell1SOH == -1 && cell2SOH == -1 && cell3SOH == -1) {
     digitalWrite(rPin, LOW);
     digitalWrite(gPin, LOW);
     digitalWrite(bPin, LOW);
