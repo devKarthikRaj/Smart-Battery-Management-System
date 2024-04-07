@@ -11,6 +11,9 @@
     8. Post data to ThingSpeak                                   (Done)
     9. Post data to Mobile app                                   (Done)
 
+    Notes:
+    time calculation using millis = (current time - initial time)
+
   WARNING: Remove sensitive info before pushing to Github
  ******************************************************************/
 
@@ -34,6 +37,17 @@ const int bPin          =  27;  //RGB blue pin
 const char* ssid = "";    // ***Remove before pushing***
 const char* pwd = "";     //***Remove before pushing***
 WiFiClient client;
+
+//Charge Stats Vars
+unsigned long cell1EndChargeTime;
+unsigned long cell2EndChargeTime;
+unsigned long cell3EndChargeTime;
+bool cell1EndChargeTimerFlag = false;
+bool cell2EndChargeTimerFlag = false;
+bool cell3EndChargeTimerFlag = false;
+float lastUpdatedVc1;
+float lastUpdatedVc2;
+float lastUpdatedVc3;
 
 void setup() {
   //Serial.begin(115200); //Init serial
@@ -78,16 +92,41 @@ void loop() {
   float cell3SOH = -1;
   float combinedSOH = -1;
   
-  if (cell1Voltage > 4.1 && cell1Voltage < 4.2) {
+  if (Vc1 > 4.1) { //Good battery
+    if(cell1EndChargeTimerFlag) {
+      cell1EndChargeTime = millis();
+      //long blink color 1 time
+    }
     //Calculate SOH only when battery is at full charge
     float cell1SOH = calculateSOH(Vc1);
-    float cell2SOH = calculateSOH(Vc2);
-    float cell3SOH = calculateSOH(Vc3);
-    float combinedSOH = ((cell1SOH+cell2SOH+cell3SOH) / 300) * 100;
+  } else { //Bad battery
+    if(lastUpdatedVc1 == Vc1 && /*logic for millis*/) {
+      //rapid blink cell 1 colour 3 times
+    }
   }
 
+  if (Vc2 > 4.1) { //Good battery
+    if(cell2EndChargeTimerFlag) {
+      cell2EndChargeTime = millis();
+    }
+    //Calculate SOH only when battery is at full charge
+    float cell2SOH = calculateSOH(Vc2);
+  } else { //Bad battery
+
+  }
+
+  if (Vc3 > 4.1) { //Good battery
+    if(cell3EndChargeTimerFlag) {
+      cell3EndChargeTime = millis();
+    }
+    //Calculate SOH only when battery is at full charge
+    float cell3SOH = calculateSOH(Vc3);
+  } else { //Bad battery
+
+  }
+  float combinedSOH = ((cell1SOH+cell2SOH+cell3SOH) / 300) * 100;
   //Drive RGB LED based on SOH value
-  DriveRGB(rPin, gPin, bPin, cell1SOH, cell2SOH, cell3SOH);
+  DriveRgbSoh(rPin, gPin, bPin, cell1SOH, cell2SOH, cell3SOH);
   
   //Read Ambient Temp + Fan Control
   float ambientTemp = TempSense(34);
@@ -211,37 +250,5 @@ float calculateSOH(float voltage) {
   return soh;
 }
 
-void DriveRGB(int rPin, int gPin, int bPin, float cell1SOH, float cell2SOH, float cell3SOH) {
-  if (cell1SOH == -1 && cell2SOH == -1 && cell3SOH == -1) {
-    digitalWrite(rPin, LOW);
-    digitalWrite(gPin, LOW);
-    digitalWrite(bPin, LOW);
-    return; // Exit function
-  }
-
-  // Determine the overall health of the 3 cells based on SoH
-  int healthyCells = 0;
-  if (cell1SOH > 90) healthyCells++;
-  if (cell2SOH > 90) healthyCells++;
-  if (cell3SOH > 90) healthyCells++;
-
-
-  // Drive the RGB LED based on the health of the 3 cells
-  if (healthyCells == 3) { // All 3 cells are healthy
-    digitalWrite(rPin, LOW);
-    digitalWrite(gPin, HIGH); // Green
-    digitalWrite(bPin, LOW);
-  } else if (healthyCells == 2) { // 2 out of the 3 cells are healthy
-    digitalWrite(rPin, HIGH); // Orange
-    analogWrite(gPin, 128); 
-    digitalWrite(bPin, LOW);
-  } else if (healthyCells == 1) { // 1 out of the 3 cells is healthy
-    digitalWrite(rPin, HIGH); // Yellow
-    digitalWrite(gPin, HIGH); 
-    digitalWrite(bPin, LOW);
-  } else { // 0 out of 3 cells is healthy
-    digitalWrite(rPin, HIGH); // Red
-    digitalWrite(gPin, LOW);
-    digitalWrite(bPin, LOW);
-  }
+void DriveRgb(int rPin, int gPin, int bPin, int color) {
 }
