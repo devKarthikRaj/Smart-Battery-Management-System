@@ -7,12 +7,11 @@
     4. Activate the fan if temp exceeds a preset threshold       (Done)
     5. Calculate SoC                                             (Done)
     6. Calculate SoH                                             (Done)
-    7. Drive the RGB LED based on combined SoH for all 3 cells   (TBC...)
+    7. Drive the RGB LED based on combined SoH for all 3 cells   (Done)
     8. Post data to ThingSpeak                                   (Done)
     9. Post data to Mobile app                                   (Done)
 
     Notes:
-    time calculation using millis = (current time - initial time)
 
   WARNING: Remove sensitive info before pushing to Github
  ******************************************************************/
@@ -48,6 +47,7 @@ bool cell3EndChargeTimerFlag = false;
 float lastUpdatedVc1;
 float lastUpdatedVc2;
 float lastUpdatedVc3;
+bool timerStarted = false;  // Flag to indicate timer started
 
 void setup() {
   //Serial.begin(115200); //Init serial
@@ -92,38 +92,75 @@ void loop() {
   float cell3SOH = -1;
   float combinedSOH = -1;
   
-  if (Vc1 > 4.1) { //Good battery
-    if(cell1EndChargeTimerFlag) {
+  if (Vc1 > 4.1) { // Good battery
+    if (cell1EndChargeTimerFlag) {
       cell1EndChargeTime = millis();
-      //long blink color 1 time
+      DriveRgb(0, 255, 0);  // Blink green 1 time
+      cell1EndChargeTimerFlag = false;
     }
-    //Calculate SOH only when battery is at full charge
+    // Calculate SOH only when battery is at full charge
     float cell1SOH = calculateSOH(Vc1);
-  } else { //Bad battery
-    if(lastUpdatedVc1 == Vc1 && /*logic for millis*/) {
-      //rapid blink cell 1 colour 3 times
+  } else { // Bad battery
+    if (lastUpdatedVc1 == Vc1 && !timerStarted) {
+      unsigned long currentTime = millis();
+      if (currentTime - cell1EndChargeTime >= 180000) {  // Check if 3 minutes has passed
+         timerStarted = true;  // Start the timer
+        DriveRgb(0, 255, 0);  // Flash green
+        delay(50);  // Adjust delay time as needed
+        DriveRgb(0, 0, 0);  // Turn off LED
+        delay(50);  // Adjust delay time as needed
+      }
     }
   }
-
-  if (Vc2 > 4.1) { //Good battery
-    if(cell2EndChargeTimerFlag) {
+  lastUpdatedVc1 = Vc1;  // Update last updated Vc1 value
+}
+  
+  if (Vc2 > 4.1) { // Good battery
+    if (cell2EndChargeTimerFlag) {
       cell2EndChargeTime = millis();
+      DriveRgb(255, 255, 0);  // Blink yellow 1 time
+      cell2EndChargeTimerFlag = false;
     }
-    //Calculate SOH only when battery is at full charge
+    // Calculate SOH only when battery is at full charge
     float cell2SOH = calculateSOH(Vc2);
-  } else { //Bad battery
-
-  }
-
-  if (Vc3 > 4.1) { //Good battery
-    if(cell3EndChargeTimerFlag) {
-      cell3EndChargeTime = millis();
+  } else { // Bad battery
+    if (lastUpdatedVc2 == Vc2 && !timerStarted) {
+      unsigned long currentTime = millis();
+      if (currentTime - cell2EndChargeTime >= 180000) {  // Check if 3 minutes has passed
+        timerStarted = true;  // Start the timer
+        DriveRgb(255, 255, 0);  // Flash yellow
+        delay(50);  // Adjust delay time as needed
+        DriveRgb(0, 0, 0);  // Turn off LED
+        delay(50);  // Adjust delay time as needed
+      }
     }
-    //Calculate SOH only when battery is at full charge
-    float cell3SOH = calculateSOH(Vc3);
-  } else { //Bad battery
-
   }
+  lastUpdatedVc2 = Vc2;  // Update last updated Vc2 value
+}
+
+  if (Vc3 > 4.1) { // Good battery
+    if (cell3EndChargeTimerFlag) {
+      cell3EndChargeTime = millis();
+      DriveRgb(255, 0, 0);  // Blink red 1 time
+      cell3EndChargeTimerFlag = false;
+    }
+    // Calculate SOH only when battery is at full charge
+    float cell3SOH = calculateSOH(Vc3);
+  } else { // Bad battery
+    if (lastUpdatedVc3 == Vc3 && !timerStarted) {
+      unsigned long currentTime = millis();
+      if (currentTime - cell3EndChargeTime >= 180000) {  // Check if 3 minutes has passed
+        timerStarted = true;  // Start the timer
+        DriveRgb(255, 0, 0);  // Flash red
+        delay(100);  // Adjust delay time as needed
+        DriveRgb(0, 0, 0);  // Turn off LED
+        delay(100);  // Adjust delay time as needed
+      }
+    }
+  }
+  lastUpdatedVc3 = Vc3;  // Update last updated Vc2 value
+}
+  
   float combinedSOH = ((cell1SOH+cell2SOH+cell3SOH) / 300) * 100;
   //Drive RGB LED based on SOH value
   DriveRgbSoh(rPin, gPin, bPin, cell1SOH, cell2SOH, cell3SOH);
@@ -245,10 +282,13 @@ float calculateSOH(float voltage) {
   float soh = (voltage / initialVoltage) * 100.0;
 
   // Ensure SOH stays within valid range
-  soh = max(0.0f, min(100.0f, soh));
+  soh = max(0.0f, min(100.0f, soh)); // It returns the larger of the 2 values, this is used to keep it within the range
 
   return soh;
 }
 
-void DriveRgb(int rPin, int gPin, int bPin, int color) {
+void DriveRgb(int redvalue, int greenvalue, int bluevalue) {
+  analogWrite(rPin, redvalue);
+  analogWrite(gPin, greenvalue);
+  analogWrite(bPin, bluevalue);
 }
