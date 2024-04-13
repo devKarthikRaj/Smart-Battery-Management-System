@@ -1,27 +1,20 @@
-/****************************************************************** 
-  Project: DIP 3s BMS ESP32 Firmware V1
-  Requirements:
-    1. Read battery voltage                                      (Done)
-    2. Convert battery voltage ADC value to actual voltage value (Done)
-    3. Read temp sensor                                          (Done)
-    4. Activate the fan if temp exceeds a preset threshold       (Done)
-    5. Calculate SoC                                             (Done)
-    6. Calculate SoH                                             (Done)
-    7. Drive the RGB LED based on combined SoH for all 3 cells   (Done)
-    8. Post data to ThingSpeak                                   (Done)
-    9. Post data to Mobile app                                   (Done)
+//Constant Definitions
+#define ambientTempThreshold 15  //Fan will turn on if temp exceeds 30 deg C
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL6m-UOY92p" // Access code for Blynk
+#define BLYNK_TEMPLATE_NAME "BMS" // Access code for Blynk
+#define BLYNK_AUTH_TOKEN "M9BpsXbl3JkOrzozAKsXzokN0JTHX8Of"// Access code for Blynk
+#define V1 1
+#define V2 2
+#define V3 3
+#define V4 4
 
-    Notes:
-
-  WARNING: Remove sensitive info before pushing to Github
- ******************************************************************/
-
-#include <WiFi.h>
-#include "ThingSpeak.h"
+// Blynk Auth Token
+char auth[] = BLYNK_AUTH_TOKEN;
 
 //Pin Definitions
-const int cell1Pin      =  32;  //Cell 1 voltage pin
-const int cell2Pin      =  33;  //Cell 2 voltage pin
+const int cell1Pin      =  33;  //Cell 1 voltage pin
+const int cell2Pin      =  32;  //Cell 2 voltage pin
 const int cell3Pin      =  35;  //Cell 3 voltage pin
 const int tempSensePin  =  34;  //Temperature sensor pin
 const int fanConPin     =  23;  //Fan control pin
@@ -29,12 +22,14 @@ const int rPin          =  25;  //RGB red pin
 const int gPin          =  26;  //RGB green pin
 const int bPin          =  27;  //RGB blue pin
 
-//Const Definitions
-#define ambientTempThreshold 30  //Fan will turn on if temp exceeds 30 deg C
+//Add Libraries
+#include <WiFi.h>
+#include <ThingSpeak.h>
+#include <BlynkSimpleEsp32.h>
 
 //WiFi Vars
-const char* ssid = "";    // ***Remove before pushing***
-const char* pwd = "";     //***Remove before pushing***
+const char* ssid = "dlink-193C";    // ***Remove before pushing***
+const char* pwd = "mczep88481";     //***Remove before pushing***
 WiFiClient client;
 
 //Charge Stats Vars
@@ -47,14 +42,14 @@ bool cell3EndChargeTimerFlag = false;
 float lastUpdatedVc1;
 float lastUpdatedVc2;
 float lastUpdatedVc3;
-bool timerStarted = false;  // Flag to indicate timer started
 
 void setup() {
-  //Serial.begin(115200); //Init serial
+  Serial.begin(115200); //Init serial
 
   ConnectWifi(); //This is a blocking function!!!
 
   ThingSpeak.begin(client); //Initialize ThingSpeak
+  Blynk.begin(auth, ssid, pwd); // Initialize Blynk
 
   //IO Definitions
   pinMode(cell1Pin, INPUT);
@@ -70,10 +65,12 @@ void setup() {
 void loop() {
   ConnectWifi();  //ConnectWifi called again in case Wifi abruptly disconnects
 
+  Blynk.run(); // Run Blynk loop
+
   //Read stepped down added cell voltages and calculate the actual added cell voltages
-  float Vc1 = CellVoltageSense(cell1Pin);
-  float Vc2 = CellVoltageSense(cell2Pin);
-  float Vc3 = CellVoltageSense(cell3Pin);
+  float Vc1 = CellVoltageSense(cell1Pin) - 0.67343; //Offset for res tolerance
+  float Vc2 = CellVoltageSense(cell2Pin) + 0.45296; //Offset for res tolerance
+  float Vc3 = CellVoltageSense(cell3Pin) + 1.67958; //Offset for res tolerance
 
   //Calculate individual cell voltages
   Vc1 = Vc1 - Vc2;
@@ -84,7 +81,6 @@ void loop() {
   float cell1SOC = calculateSOC(Vc1);
   float cell2SOC = calculateSOC(Vc2);
   float cell3SOC = calculateSOC(Vc3);
-
   
   //Set SOH to -1 to indicate that SOH cannot be calculated as battery is not fully charged
   float cell1SOH = -1;
@@ -104,7 +100,7 @@ void loop() {
     if (lastUpdatedVc1 == Vc1 && !timerStarted) {
       unsigned long currentTime = millis();
       if (currentTime - cell1EndChargeTime >= 180000) {  // Check if 3 minutes has passed
-         timerStarted = true;  // Start the timer
+        //timerStarted = true;  // Start the timer
         DriveRgb(0, 255, 0);  // Flash green
         delay(50);  // Adjust delay time as needed
         DriveRgb(0, 0, 0);  // Turn off LED
@@ -113,7 +109,6 @@ void loop() {
     }
   }
   lastUpdatedVc1 = Vc1;  // Update last updated Vc1 value
-}
   
   if (Vc2 > 4.1) { // Good battery
     if (cell2EndChargeTimerFlag) {
@@ -127,7 +122,7 @@ void loop() {
     if (lastUpdatedVc2 == Vc2 && !timerStarted) {
       unsigned long currentTime = millis();
       if (currentTime - cell2EndChargeTime >= 180000) {  // Check if 3 minutes has passed
-        timerStarted = true;  // Start the timer
+        //timerStarted = true;  // Start the timer
         DriveRgb(255, 255, 0);  // Flash yellow
         delay(50);  // Adjust delay time as needed
         DriveRgb(0, 0, 0);  // Turn off LED
@@ -136,7 +131,7 @@ void loop() {
     }
   }
   lastUpdatedVc2 = Vc2;  // Update last updated Vc2 value
-}
+
 
   if (Vc3 > 4.1) { // Good battery
     if (cell3EndChargeTimerFlag) {
@@ -150,7 +145,7 @@ void loop() {
     if (lastUpdatedVc3 == Vc3 && !timerStarted) {
       unsigned long currentTime = millis();
       if (currentTime - cell3EndChargeTime >= 180000) {  // Check if 3 minutes has passed
-        timerStarted = true;  // Start the timer
+        //timerStarted = true;  // Start the timer
         DriveRgb(255, 0, 0);  // Flash red
         delay(100);  // Adjust delay time as needed
         DriveRgb(0, 0, 0);  // Turn off LED
@@ -159,22 +154,28 @@ void loop() {
     }
   }
   lastUpdatedVc3 = Vc3;  // Update last updated Vc2 value
-}
-  
-  float combinedSOH = ((cell1SOH+cell2SOH+cell3SOH) / 300) * 100;
-  //Drive RGB LED based on SOH value
-  DriveRgbSoh(rPin, gPin, bPin, cell1SOH, cell2SOH, cell3SOH);
+
+  combinedSOH = ((cell1SOH+cell2SOH+cell3SOH) / 300) * 100;
   
   //Read Ambient Temp + Fan Control
   float ambientTemp = TempSense(34);
-
   
   if (ambientTemp > ambientTempThreshold) {
     digitalWrite(fanConPin, HIGH);
   }
+
+  //Publish all cell monitoring data to Blynk
+  PublishBlynkData(Vc1,Vc2,Vc3,ambientTemp);
   
   //Publish all cell monitoring data to ThingSpeak
   ThingSpeakWrite8Floats(Vc1, Vc2, Vc3, cell1SOC, cell2SOC, cell3SOC, combinedSOH, ambientTemp);
+
+  //Fast blink RGB orange to indicate looping
+  DriveRgb(247, 152, 29);
+  delay(100);
+  DriveRgb(247, 152, 29);
+  delay(100);
+  DriveRgb(0, 0, 0);
 }
 
 void ConnectWifi() {
@@ -211,7 +212,16 @@ float CellVoltageSense(int cellVoltageSensePin) {
   ///Serial.print(Vb);
   //Serial.println();
 
-  return cellVoltageRaw;
+  return Vb;
+}
+
+void PublishBlynkData(float data1, float data2, float data3, float data4) {
+  // Send data to Blynk
+  Blynk.virtualWrite(V1, data1);
+  Blynk.virtualWrite(V2, data2);
+  Blynk.virtualWrite(V3, data3);
+  Blynk.virtualWrite(V4, data4);
+  delay (1000);
 }
 
 bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, float data5, float data6, float data7, float data8) {
@@ -230,7 +240,7 @@ bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, 
   ThingSpeak.setField(8, data8);
   int writeStatusCode = ThingSpeak.writeFields(channelId, writeAPIKey);
 
-  
+  //Debugging
   /*//ThingSpeak will return HTTP status code 200 if successful
   if (writeStatusCode == 200) {
     Serial.println("ThingSpeak Channel update successful.");
