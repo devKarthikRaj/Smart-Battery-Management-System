@@ -193,7 +193,7 @@ void ConnectWifi() {
 //Reads the raw stepped down added cell voltage and converts this raw reading back to the actual added cell voltage
 float CellVoltageSense(int cellVoltageSensePin) {
   //Conversion Vars
-  const float conversionFactor = 4.2 / 4096;  //Li ion max cell voltage = 4.2 and ESP32 ADC = 12 bits so 2^12 = 4096
+  const float conversionFactor = 3.3 / 4096;  //Li ion max cell voltage = 4.2 and ESP32 ADC = 12 bits so 2^12 = 4096
   const float conversionOffset = -0.1;        //ADC conversion offset
   const int Rb = 10;
   const int Rs = 1;
@@ -258,8 +258,8 @@ bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, 
 
 float TempSense(int tempSensePin) {
   //Conversion Vars
-  const float conversionFactor = 3.3 / 4096;  //Li ion max cell voltage = 4.2 and ESP32 ADC = 12 bits so 2^12 = 4096
-  const float conversionOffset = 0;           //ADC conversion offset
+  const float conversionFactor = 3.3 / 4096;  //System max voltage = 3.3V as ESP ADC runs on 3.3V and ESP32 ADC = 12 bits so 2^12 = 4096
+  const float conversionOffset = 0.1;           //ADC conversion offset
 
   //Conversion
   int tempRaw = analogRead(tempSensePin);
@@ -270,13 +270,13 @@ float TempSense(int tempSensePin) {
 
 float calculateSOC(float voltage) {
   //Define voltage range and corresponding SOC values
-  float minVoltage = 2.5;  //Minimum bat voltage
+  float minVoltage = 3.2;  //Minimum bat voltage
   float maxVoltage = 4.2;  //Maximum bat voltage
   float minSOC = 0.0;      //Minimum SOC when bat is empty
   float maxSOC = 100.0;    //Maximum SOC when bat is on full charged
 
   //Calculate SOC with linear interpolation formula
-  float soc = (((voltage - minVoltage) / (maxVoltage - minVoltage)) * (maxSOC - minSOC)) + minSOC;
+  float soc = (((voltage - minVoltage) / (maxVoltage - minVoltage)) * 100
 
   // Ensure SOC stays within valid range
   soc = max(minSOC, min(maxSOC, soc));
