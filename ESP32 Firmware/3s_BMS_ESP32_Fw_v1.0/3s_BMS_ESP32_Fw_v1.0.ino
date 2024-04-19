@@ -28,8 +28,8 @@ const int bPin          =  27;  //RGB blue pin
 #include <BlynkSimpleEsp32.h>
 
 //WiFi Vars
-const char* ssid = "dlink-193C";    // ***Remove before pushing***
-const char* pwd = "mczep88481";     //***Remove before pushing***
+const char* ssid = "Mehan";    // ***Remove before pushing***
+const char* pwd = "bfkacu867eau5tx";     //***Remove before pushing***
 WiFiClient client;
 
 //Charge Stats Vars
@@ -60,6 +60,8 @@ void setup() {
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
+
+  DriveRgb(0,0,0); //Initially set RGB led to off
 }
 
 void loop() {
@@ -169,13 +171,6 @@ void loop() {
   
   //Publish all cell monitoring data to ThingSpeak
   ThingSpeakWrite8Floats(Vc1, Vc2, Vc3, cell1SOC, cell2SOC, cell3SOC, combinedSOH, ambientTemp);
-
-  //Fast blink RGB orange to indicate looping
-  DriveRgb(247, 152, 29);
-  delay(100);
-  DriveRgb(247, 152, 29);
-  delay(100);
-  DriveRgb(0, 0, 0);
 }
 
 void ConnectWifi() {
@@ -253,7 +248,31 @@ bool ThingSpeakWrite8Floats(float data1, float data2, float data3, float data4, 
   //If the data packets are sent out in under 15s intervals, HTTP status code 401 will be returned
   //Some packets will still be sent but this is not recommended
   //So set min delay to atleast 15s
-  delay(20000);
+  
+  //Blink RGB led to indicate looping
+  DriveRgb(255,50,0);
+  delay(300);
+  DriveRgb(0,0,0);
+  delay(300);
+  delay(5000);
+  
+  DriveRgb(255,50,0);
+  delay(300);
+  DriveRgb(0,0,0);
+  delay(300);
+  delay(5000);
+
+  DriveRgb(255,50,0);
+  delay(300);
+  DriveRgb(0,0,0);
+  delay(300);
+  delay(5000);
+
+  DriveRgb(255,50,0);
+  delay(300);
+  DriveRgb(0,0,0);
+  delay(300);
+  delay(5000);
 }
 
 float TempSense(int tempSensePin) {
@@ -276,7 +295,7 @@ float calculateSOC(float voltage) {
   float maxSOC = 100.0;    //Maximum SOC when bat is on full charged
 
   //Calculate SOC with linear interpolation formula
-  float soc = (((voltage - minVoltage) / (maxVoltage - minVoltage)) * 100
+  float soc = ((voltage - minVoltage) / (maxVoltage - minVoltage)) * 100;
 
   // Ensure SOC stays within valid range
   soc = max(minSOC, min(maxSOC, soc));
