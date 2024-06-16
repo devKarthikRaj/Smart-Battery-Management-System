@@ -10,7 +10,7 @@ With the advent of electric vehicles, charging has become an integral part of ou
 This BMS we created balance charges 3 lithium-ion cells, basically a glorified lithium-ion battery charger. Why glorified? Well, most chargers / passive BMS on the market right now just charge batteries. There is no monitoring capability whatsoever. Due to this, we cannot leave our batteries unattended while charging them. What if I want to do a grocery run while I charge my batteries? What if I want to go for an evening run while I charge my batteries? I can't do any of those things. This is where our BMS comes in! Our BMS lets you monitor your batteries while they are charging from anywhere in the world through a webpage and a mobile app available on both iOS and Android devices. 
 
 ## Contents
-The parts of the project I worked on are the BMS PCB designed in Altium Designer, ESP32 firmware written in C++ through the Arduino IDE and an enclosure for the PCB designed in Fusion 360 and 3D printed with TPU.
+The parts of the project I worked on are the BMS PCB designed in Altium Designer, a part of the ESP32 firmware written in C++ through the Arduino IDE and an enclosure for the PCB designed in Fusion 360 and 3D printed with TPU.
 
 ## BMS PCB
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Main.png" alt="Rover v1 final take 2"></div><br>
