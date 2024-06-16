@@ -14,14 +14,19 @@ The parts of the project I worked on are the BMS PCB designed in Altium Designer
 
 ## BMS PCB
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Main.png" alt="Rover v1 final take 2"></div><br><br>
-This is the main schematic. The top half of the schematic is the constant voltage constant current CV/CC circuit implemented using an adjustable LM317 voltage regulator. The bottom half of the schematic is the ESP32 microcontroller board to sensor/actuator interface circuit - This circuit connects the onboard temperature sensor, RGB LED and mini fan to the the microcontroller. This circuit also connects various parts of the charging circuit to the ESP32 to allow the microcontroller to non-invasively monitor the charging process. <br />
+This is the main schematic. The top half of the schematic is the constant voltage constant current CV/CC circuit implemented using an adjustable LM317 voltage regulator. The bottom half of the schematic is the ESP32 microcontroller board to sensor/actuator interface circuit - This circuit connects the onboard temperature sensor, RGB LED and mini fan to the the microcontroller. This circuit also connects various parts of the charging circuit to the ESP32 to allow the microcontroller to non-invasively monitor the charging process.
 
+&nbsp;
 
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Balance%20Indicator.png" alt="Rover v1 final take 2"></div><br><br>
-This circuit is contained inside the green circuit blocks in the main schematic. This particular circuit is in charge of cutting off the charging process when the max desired cell voltage has been reached. This max desired cell voltage can be set by adjusting the potentiometer. Once the max desired cell voltage is reached, the indicator LED will light up giving a visual indicator to the user that the charging process is complete. <br>
+This circuit is contained inside the green circuit blocks in the main schematic. This particular circuit is in charge of cutting off the charging process when the max desired cell voltage has been reached. This max desired cell voltage can be set by adjusting the potentiometer. Once the max desired cell voltage is reached, the indicator LED will light up giving a visual indicator to the user that the charging process is complete.
+
+&nbsp;
 
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20v2%20Layout.png"></div><br><br>
 This is the layout of the BMS PCB. Copper pours (polygons) have been used for power nets to keep this PCB as cool as a cucumber! <br>
+
+&nbsp;
 
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20v2%203d%20View.png"></div><br><br>
 Here's a 3D render of the PCB. Note that the ESP32 microcontroller board is not shown in the render.
@@ -39,6 +44,8 @@ Here's a 3D render of the PCB. Note that the ESP32 microcontroller board is not 
 ●	A detailed breakdown of all parameters (3 cell voltages, SoC, SoH and ambient temperature) and trend charts available through a web interface (ThingSpeak). <br>
 
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/ThingSpeak%20Dashboard.png"></div><br><br>
+
+&nbsp;
 
 ●	3 Cell voltages and ambient temperature also available through a mobile application on both iOS and Android devices. <br>
 
