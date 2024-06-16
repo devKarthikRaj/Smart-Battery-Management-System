@@ -13,16 +13,16 @@ This BMS we created balance charges 3 lithium-ion cells, basically a glorified l
 The parts of the project I worked on are the BMS PCB designed in Altium Designer, ESP32 firmware written in C++ through the Arduino IDE and an enclosure for the PCB designed in Fusion 360 and 3D printed with TPU.
 
 ## BMS PCB
-<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Main.png" alt="Rover v1 final take 2"></div><br>
+<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Main.png" alt="Rover v1 final take 2"></div><br><br>
 This is the main schematic. The top half of the schematic is the constant voltage constant current CV/CC circuit implemented using an adjustable LM317 voltage regulator. The bottom half of the schematic is the ESP32 microcontroller board to sensor/actuator interface circuit - This circuit connects the onboard temperature sensor, RGB LED and mini fan to the the microcontroller. This circuit also connects various parts of the charging circuit to the ESP32 to allow the microcontroller to non-invasively monitor the charging process.
 
-<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Balance%20Indicator.png" alt="Rover v1 final take 2"></div><br>
+<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20Schematic%20Balance%20Indicator.png" alt="Rover v1 final take 2"></div><br><br>
 This circuit is contained inside the green circuit blocks in the main schematic. This particular circuit is in charge of cutting off the charging process when the max desired cell voltage has been reached. This max desired cell voltage can be set by adjusting the potentiometer. Once the max desired cell voltage is reached, the indicator LED will light up giving a visual indicator to the user that the charging process is complete.
 
-<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20v2%20Layout.png"></div><br>
+<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20v2%20Layout.png"></div><br><br>
 This is the layout of the BMS PCB. Copper pours (polygons) have been used for power nets to keep this PCB as cool as a cucumber!
 
-<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20v2%203d%20View.png"></div><br>
+<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20v2%203d%20View.png"></div><br><br>
 Here's a 3D render of the PCB. Note that the ESP32 microcontroller board is not shown in the render.
 
 ### BMS PCB Features
@@ -37,13 +37,13 @@ Here's a 3D render of the PCB. Note that the ESP32 microcontroller board is not 
 ●	Onboard microcontroller with WiFi capabilities to monitor all parameters of the BMS. <br>
 ●	A detailed breakdown of all parameters (3 cell voltages, SoC, SoH and ambient temperature) and trend charts available through a web interface (ThingSpeak). <br>
 
-<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/ThingSpeak%20Dashboard.png"></div><br>
+<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/ThingSpeak%20Dashboard.png"></div><br><br>
 
 ●	3 Cell voltages and ambient temperature also available through a mobile application on both iOS and Android devices. <br>
 
 ## BMS Enclosure CAD Model
 <div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20Enclosure%20CAD%20Model%20(1).png"></div>
-<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20Enclosure%20CAD%20Model%20(2).png"></div><br>
+<div align="center"><img src="https://github.com/devKarthikRaj/Smart-Battery-Management-System/blob/master/Media/3S%20BMS%20PCB%20Enclosure%20CAD%20Model%20(2).png"></div><br><br>
 Here is a 3D render of the BMS Enclosure. This model was 3D printed in TPU. The mini fan that was supposed to keep things cool is not shown in this render.
 
 # Conclusion
