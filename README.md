@@ -1,5 +1,6 @@
 # NTU EE3180 Design Innovation Project 3S Battery Management System (BMS) AY2023-24
-<span style="background-color: orange">This was a group project. The parts of the project I worked on are in this repo.</span>
+> [!IMPORTANT]
+> This was a group project. The parts of the project I worked on are in this repo.
 
 ## About
 With the advent of electric vehicles, charging has become an integral part of our daily lives. This has resulted in a sudden increase in the demand for battery chargers, specifically lithium-ion battery chargers. These lithium-ion batteries are very needy. They have to be charged at a specific voltage and current to remain healthy and function reliably. When charging multiple lithium-ion cells in a battery pack, they have to be charged and discharged in a balanced manner. Over-charging or over-discharging a particular cell in a battery pack could lead to dire consequences i.e the battery going BOOM!!! Now we certainly do not want that. This is where our battery management system (BMS) comes in. 
