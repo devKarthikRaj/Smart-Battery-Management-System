@@ -28,8 +28,8 @@ const int bPin          =  27;  //RGB blue pin
 #include <BlynkSimpleEsp32.h>
 
 //WiFi Vars
-const char* ssid = "Mehan";    // ***Remove before pushing***
-const char* pwd = "bfkacu867eau5tx";     //***Remove before pushing***
+const char* ssid = "";    // ***Remove before pushing***
+const char* pwd = "";     //***Remove before pushing***
 WiFiClient client;
 
 //Charge Stats Vars
@@ -70,13 +70,14 @@ void loop() {
   Blynk.run(); // Run Blynk loop
 
   //Read stepped down added cell voltages and calculate the actual added cell voltages
-  float Vc1 = CellVoltageSense(cell1Pin) - 0.67343; //Offset for res tolerance
-  float Vc2 = CellVoltageSense(cell2Pin) + 0.45296; //Offset for res tolerance
-  float Vc3 = CellVoltageSense(cell3Pin) + 1.67958; //Offset for res tolerance
+  float Vc1 = CellVoltageSense(cell1Pin); //+ 1.130; //Offset for res tolerance
+  float Vc2 = CellVoltageSense(cell2Pin); //+ 1.100; //Offset for res tolerance
+  float Vc3 = CellVoltageSense(cell3Pin); //+ 2.590; //Offset for res tolerance
 
   //Calculate individual cell voltages
   Vc1 = Vc1 - Vc2;
-  Vc2 = Vc2 - Vc3;
+  Vc2 = Vc2 - Vc3 - 0.15;
+  Vc3 = Vc3 + 2.49;
   //Vc3 is the actual voltage of the 3rd cell
 
   //Calculate SOC
