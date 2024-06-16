@@ -18,15 +18,14 @@ This is the main schematic. The top half of the schematic is the constant voltag
 This circuit is contained inside the green circuit blocks in the main schematic. This particular circuit is in charge of cutting off the charging process when the max desired cell voltage has been reached. This max desired cell voltage can be set by adjusting the potentiometer. Once the max desired cell voltage is reached, the indicator LED will light up giving a visual indicator to the user that the charging process is complete.
 
 ### BMS PCB Features
-●	Up to 3 lithium-ion batteries can be charged simultaneously with this PCB.
-●	DC Jack for input voltage from a wall plug.
-●	ATOF series blade fuse for overcurrent protection is easily replaceable by the user.
-●	3 Potentiometers enable the user to adjust the maximum charge voltage of each battery separately thereby allowing the user to charge various types of lithium-ion cells to different voltages as and when required.
-●	3 Single colour indicator LEDs to alert the user when each battery has been fully charged.
-●	RGB LED to indicate SoH and charging status.
-●	Temperature sensor to sense ambient temperature.
-●	Interface for a small ventilator fan to keep the PCB at desirable temperatures. (~25°C-30°C)
+●	Up to 3 lithium-ion batteries can be charged simultaneously with this PCB. <br>
+●	DC Jack for input voltage from a wall plug. <br>
+●	ATOF series blade fuse for overcurrent protection is easily replaceable by the user. <br>
+●	3 Potentiometers enable the user to adjust the maximum charge voltage of each battery separately thereby allowing the user to charge various types of lithium-ion cells to different voltages as and when required. <br>
+●	3 Single colour indicator LEDs to alert the user when each battery has been fully charged. <br>
+●	RGB LED to indicate SoH and charging status. <br>
+●	Temperature sensor to sense ambient temperature. <br>
+●	Interface for a small ventilator fan to keep the PCB at desirable temperatures (~25°C-30°C). <br>
 ●	Onboard microcontroller with WiFi capabilities to monitor all parameters of the BMS.
-●	A detailed breakdown of all parameters (3 cell voltages, SoC, SoH and ambient temperature) and trend charts available through a web interface. (ThinkSpeak)
-●	3 Cell voltages and ambient temperature also available through a mobile application on both iOS and Android devices
-
+●	A detailed breakdown of all parameters (3 cell voltages, SoC, SoH and ambient temperature) and trend charts available through a web interface (ThingSpeak).
+●	3 Cell voltages and ambient temperature also available through a mobile application on both iOS and Android devices.
